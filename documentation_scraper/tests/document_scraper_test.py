@@ -30,9 +30,17 @@ class TestDocumentScraper(unittest.TestCase):
     def test_extract_subsection_content(self):
         doc_content = extract_document_content(self.soup)
         subsections = extract_subsections(doc_content)
+        
         subsection_0_content = extract_subsection_content(subsections[0])
         self.assertIsInstance(subsection_0_content, dict)
         self.assertEqual(subsection_0_content['title'], 'Description')
         self.assertEqual(len(subsection_0_content['content']), 2)
+        
+        subsection_1_content = extract_subsection_content(subsections[1])
+        self.assertIsInstance(subsection_1_content, dict)
+        self.assertEqual(subsection_1_content['title'], 'Syntax')
+        self.assertEqual(len(subsection_1_content['content']), 2)
+        self.assertEqual(subsection_1_content['content'][0]['type'], 'code')
+        
         
 
