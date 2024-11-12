@@ -24,6 +24,10 @@ def extract_subsection_content(subsection:Tag) -> dict:
         'title':'',
         'content':[]
     }
+    recursive_content_builder(subsection, content)
+    return content
+
+def recursive_content_builder(subsection, content):
     subsection_children = subsection.children
     for child in subsection_children:
         if element_is_subsection_title(child):
@@ -34,7 +38,13 @@ def extract_subsection_content(subsection:Tag) -> dict:
             content['content'].append(extract_code_element_content(child))
         elif element_is_subsection_list(child):
             content['content'].append(extract_list_element_content(child))
-    return content
+        elif element_is_subsection_table(child):
+            content['content'].append(extract_table_element_content(child))
+        elif element_is_subsection_container(child):
+            recursive_content_builder(child, content)
+
+def element_is_subsection_container(element:Tag):
+    return element.name == 'div' and len(list(element.children)) > 0
 
 def element_is_subsection_title(element:Tag):
     return element.name == 'div' and 'titlepage' in element.attrs['class'] 
@@ -43,17 +53,24 @@ def element_is_subsection_text(element:Tag):
     return element.name == 'p'
 
 def element_is_subsection_code(element:Tag):
-    return element.name == 'pre'
+    return element.name == 'pre' or element.name == 'code'
 
 def element_is_subsection_list(element:Tag):
     return element.name == 'ul' or element.name == 'ol'
 
+def element_is_subsection_table(element:Tag):
+    ...
+
 def extract_text_element_content(element:Tag) -> dict:
     #TODO: handle links
-    return {
-        'type':'text',
-        'data':element.text
-    }
+    text = element.text
+    if text == '':
+        return 
+    else:
+        return {
+            'type':'text',
+            'data':text
+        }
 
 def extract_code_element_content(element:Tag) -> dict:
     return {
@@ -64,13 +81,17 @@ def extract_code_element_content(element:Tag) -> dict:
 def extract_list_element_content(element:Tag) -> dict:
     element_content = {'type':'list', 'data':[]}
     for child in element.children:
+        #TODO: extract sublists with a structure
         if child.name == 'li':
             element_content['data'].append(child.text)
-        elif element_is_subsection_list(child):
-            element_content['data'].append(extract_list_element_content(child))
     return element_content
 
 
+def extract_table_element_content(element:Tag)-> dict:
+    element_content = {'type':'table', 'data':{}}
+    for child in element.children:
+        if child.name == 'thead':
+            extract_table_head(child)
 
 
 

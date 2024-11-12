@@ -41,6 +41,22 @@ class TestDocumentScraper(unittest.TestCase):
         self.assertEqual(subsection_1_content['title'], 'Syntax')
         self.assertEqual(len(subsection_1_content['content']), 2)
         self.assertEqual(subsection_1_content['content'][0]['type'], 'code')
+        self.assertEqual(subsection_1_content['content'][1]['type'], 'list')
+        
+        subsection_2_content = extract_subsection_content(subsections[2])
+        self.assertIsInstance(subsection_2_content, dict)
+        self.assertEqual(subsection_2_content['title'], 'NULL handling')
+        self.assertEqual(len(subsection_2_content['content']), 1)
+        self.assertEqual(subsection_2_content['content'][0]['type'], 'text')
+
+        subsection_3_content = extract_subsection_content(subsections[3])
+        self.assertIsInstance(subsection_3_content, dict)
+        self.assertEqual(subsection_3_content['title'], 'Examples')
+        # self.assertEqual(len(subsection_2_content['content']), 1)
+        # self.assertEqual(subsection_2_content['content'][0]['type'], 'text')
+
+
         
         
+
 
