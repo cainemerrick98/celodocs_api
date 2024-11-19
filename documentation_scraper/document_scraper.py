@@ -13,6 +13,8 @@ def extract_subsections(doc_content:Tag):
     extracts the subsections of a document
     """
     subsections = doc_content.find_all(name='section', recursive=False)
+    if len(subsections) == 0:
+        return [doc_content]
     return subsections
 
 def extract_subsection_content(subsection:Tag) -> dict:
@@ -86,14 +88,17 @@ def extract_list_element_content(element:Tag) -> dict:
             element_content['data'].append(child.text)
     return element_content
 
-
 def extract_table_element_content(element:Tag)-> dict:
     element_content = {'type':'table', 'data':{}}
     for child in element.children:
         if child.name == 'thead':
-            extract_table_head(child)
+            extract_table_head(child, element_content)
+        elif child.name == 'tbody':
+            extract_table_body(child, element_content)
 
+def extract_table_head(element:Tag, element_content:dict)->dict:
+    pass
 
-
-
+def extract_table_body(element:Tag, element_content:dict)->dict:
+    pass
 
