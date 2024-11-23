@@ -6,10 +6,12 @@ from utils import (
 )
 from document_scraper import (
     extract_document_content,
-    extract_pql_example_table,
+    extract_pql_example,
     extract_pql_example_rows,
     extract_pql_query_columns,
-    extract_pql_example_description
+    extract_pql_example_description,
+    extract_pql_input_tables,
+    extract_pql_output_table
 
 )
 
@@ -36,6 +38,15 @@ class TestDocumentScraper(unittest.TestCase):
 
         query_columns = extract_pql_query_columns(rows[1])
         self.assertListEqual(query_columns, ['"companyDetail"."companyCode"', 'PU_AVG ( "companyDetail" , "caseTable"."value" )'])
+
+        input_tables = extract_pql_input_tables(rows[2])
+        self.assertIsInstance(input_tables, dict)
+        self.assertListEqual(list(input_tables.keys()), ['caseTable', 'companyDetail'])
+        self.assertEqual(len(input_tables['caseTable']), 7)
+        self.assertEqual(len(input_tables['companyDetail']), 4)
+
+        output_table = extract_pql_output_table(rows[2])
+        self.assertEqual(len(output_table), 4)
 
     def test_extract_pql_example_table(self):
         doc_content = extract_document_content(self.soup)
@@ -65,13 +76,12 @@ class TestDocumentScraper(unittest.TestCase):
                 },
                 'output_table':[
                     ['Column1 : string', 'Column2 : float'],
-                    ['1', '001', '600'],
-                    ['2', '001', '400'],
-                    ['3', '001', '200'],
+                    ['001', '400.0'],
+                    ['002', '300.0'],
+                    ['003', '200.0'],
                 ]
             }
         }
 
-        output = extract_pql_example_table(table)
-
-        # self.assertDictEqual(expected_output, output)
+        output = extract_pql_example(table)
+        self.assertDictEqual(expected_output, output)

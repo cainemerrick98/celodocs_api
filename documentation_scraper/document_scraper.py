@@ -125,17 +125,17 @@ def extract_table_body(element:Tag, element_content:dict)->dict:
     pass
 
 def table_tag_to_array(table:Tag) -> list:
-    table = []
+    table_data = []
     rows = table.find_all('tr')
     for row in rows:
-        table.append([td.text.strip() for td in row.children])
-    return table
+        table_data.append([td.text.strip().replace('\'', '') for td in row.children])
+    return table_data
     
 
 
 #pql examples
 
-def extract_pql_example_table(table:Tag) -> dict:
+def extract_pql_example(table:Tag) -> dict:
     """
     pql examples are structured in a weird table format. They're very useful so they need
     a special function to extract them.
@@ -144,14 +144,16 @@ def extract_pql_example_table(table:Tag) -> dict:
     rows = extract_pql_example_rows(table)
     description = extract_pql_example_description(rows[0])
     query_columns = extract_pql_query_columns(rows[1])
+    input_tables = extract_pql_input_tables(rows[2])
+    output_table = extract_pql_output_table(rows[2])
 
     content = {
         'type':'pql example',
         'data':{
             'description':description,
             'query':query_columns, #list of column pql
-            'input_tables':{}, #potentially more than one input table relating to the query
-            'output_table':[] #the result of the query applied to the output table
+            'input_tables':input_tables, #potentially more than one input table relating to the query
+            'output_table':output_table #the result of the query applied to the output table
         }
     }
     return content
@@ -182,7 +184,7 @@ def extract_pql_query_columns(row:Tag) -> list:
     query_columns = [pre.text.strip() for pre in query_columns]
     return query_columns
 
-def extract_input_tables(row:Tag) -> dict:
+def extract_pql_input_tables(row:Tag) -> dict:
     """
     input tables are nested quite deeply in the row
     We should find the first table and then the first td element.
@@ -195,22 +197,41 @@ def extract_input_tables(row:Tag) -> dict:
     if top_table is None:
         raise ValueError(f'no <table> tag in row: ${row}')
     
-    td = row.find_next('td')
+    td = top_table.find_next('td')
     
     input_tables = {}
     current_table = None
     for child in td.children:
-        if child.text == 'Foreign Keys': #we dont want the FKs atm
+        if child.text.strip() == 'Foreign Keys': #we dont want the FKs atm
             break
         elif child.name == 'p' and child.text != '':
-            current_table = child.text
+            current_table = child.text.strip()
         elif child.name == 'div':
             if current_table is None:
                 raise ValueError(f'input table without name in td: ${td}')
-            input_tables[current_table] = table_tag_to_array()
+            try:
+                table = list(child.children)[0]
+            except IndexError:
+                raise IndexError(f'no children in div: ${child}')
+            input_tables[current_table] = table_tag_to_array(table)
 
+    return input_tables
 
+def extract_pql_output_table(row:Tag) -> dict:
+    """
+    the output table is in the same row as the input table
+    but the next td element. This function is quite similar 
+    to `extract_pql_input_table` we could abstract this logic into 
+    a seperate method.
+    """
+    top_table = row.find('table')
+    if top_table is None:
+        raise ValueError(f'no <table> tag in row: ${row}')
+    
+    td = top_table.find_next('td').next_sibling
+    output_table = table_tag_to_array(td.find_next('table'))
 
+    return output_table
 
     
     
