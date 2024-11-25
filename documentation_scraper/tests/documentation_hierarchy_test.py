@@ -4,7 +4,7 @@ from documentation_hierarchy import (
     get_celonis_docs_html,
     create_beautiful_soup,
     extract_sidebar,
-    doc_builder,
+    hierarchy_builder,
     build_documentation_hierarchy
 )
 
@@ -32,7 +32,8 @@ class TestHierarchyBuilder(unittest.TestCase):
         sidebar = extract_sidebar(soup)
         getting_started = sidebar.find('li')
         documentation_hierarchy = {}
-        doc_builder([getting_started], documentation_hierarchy)
+        hierarchy_builder([getting_started], documentation_hierarchy)
+        print(documentation_hierarchy)
         self.assertEqual(list(documentation_hierarchy.keys()), ['Getting Started'])
         self.assertTrue('Contacting Support' in list(documentation_hierarchy['Getting Started'].keys()))
     
@@ -44,5 +45,7 @@ class TestHierarchyBuilder(unittest.TestCase):
         self.assertTrue('Getting Started' in list(documentation_hierarchy.keys()))
         self.assertTrue('Studio' in list(documentation_hierarchy.keys()))
         self.assertTrue('Celonis Process Management' in list(documentation_hierarchy.keys()))
+
+        
 
         

@@ -55,10 +55,10 @@ def build_documentation_hierarchy(sidebar:Tag) -> dict:
     """
     documentation_hierarchy = {}
     sections: ResultSet[Tag] = sidebar.find_all(name='li', recursive=False)
-    doc_builder(sections, documentation_hierarchy)
+    hierarchy_builder(sections, documentation_hierarchy)
     return documentation_hierarchy
 
-def doc_builder(sections:ResultSet[Tag], documentation_hierarchy:dict, parent_name:str|None=None):
+def hierarchy_builder(sections:ResultSet[Tag], documentation_hierarchy:dict, parent_name:str|None=None):
     """
     iterates over the title sections of the documentation. If the section
     contains subsections then `doc_builder` is called recursively against 
@@ -66,19 +66,25 @@ def doc_builder(sections:ResultSet[Tag], documentation_hierarchy:dict, parent_na
     in the dicitionary keys
     """
     for section in sections:
-        title = section.find(name='a').text.strip()
+        documentation_section = section.find(name='a')
+        title = documentation_section.text.strip()
+        link = documentation_section.attrs['href']
+
         if title in documentation_hierarchy.keys():
             title = f'{parent_name} - {title}'
         sub_sections = section.find(name='ul')
 
+        documentation_hierarchy[title] = {}
+        documentation_hierarchy[title]['link'] = link
+
         if sub_sections is None:
-            documentation_hierarchy[title] = None
+            documentation_hierarchy[title]['children'] = None
         
         else:
             sub_sections = sub_sections.find_all(name='li', recursive=False)
             if len(sub_sections) == 0:
-                documentation_hierarchy[title] = None
+                documentation_hierarchy[title]['children'] = None
             else:
-                documentation_hierarchy[title] = {}
-                doc_builder(sub_sections, documentation_hierarchy[title], title)
+                documentation_hierarchy[title]['children'] = {}
+                hierarchy_builder(sub_sections, documentation_hierarchy[title]['children'], title)
     return documentation_hierarchy
