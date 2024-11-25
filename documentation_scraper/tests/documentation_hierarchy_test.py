@@ -8,7 +8,7 @@ from documentation_hierarchy import (
     build_documentation_hierarchy
 )
 
-class TestScraperFunctions(unittest.TestCase):
+class TestHierarchyBuilder(unittest.TestCase):
     
     def test_get_celonis_docs_html(self):
         docs_html = get_celonis_docs_html()

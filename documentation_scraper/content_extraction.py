@@ -1,64 +1,31 @@
-from typing import List, Union
+from typing import List, Union, Callable
 from bs4 import BeautifulSoup, Tag
 
-"""
-Keep it relatively simple and only specialise for edge cases
 
-You will either eventually reach:
-    *title = <h> - useful for context
-    *code = <pre> or <code>
-    *text = <p> - this may contain links <a> that are useful to store
-    *image = <img>
-    *video = <video>
-    *list = <ul>/<ol>
-    *table = <table>
-    *container = <div> or <section> (recursive case)
-
-    *edge cases - pql example tables...
-
-To do this you need a function to:
-    *iterate over the children of an element
-    *identify an elements `type`
-    *extract an elements content in a structured way (as a dict)
-"""
-
-def extract_document_content(soup:BeautifulSoup) -> Tag:
+def extract_document_content(document:Tag) -> list[dict]:
     """
-    extracts the root element of document content 
-    this is always the first section element
+    extracts the document content using BFS from article root 
+    which is the first section tag
     """
-    documentation_section = soup.find(name='section')
+    children = list(document.children)
     page_content = []
-    ...
-    return page_content
 
-def table_tag_to_array(table:Tag) -> list:
-    table_data = []
-    rows = table.find_all('tr')
-    for row in rows:
-        table_data.append([td.text.strip().replace('\'', '') for td in row.children])
-    return table_data
-    
-#simple implementation
-def iterate_over_element_children(element:Tag, page_content:list):
-    
-    for child in element.children:
+    for child in children:
         _type, extractor = identify_element_type(child)
-
         #recursive case
         if _type == 'container':
-            iterate_over_element_children(child, page_content)
+            children += child.children
         #dont care case
         elif _type is None:
             continue
         #content case
         else:
-            element_content = extractor(element)
-            page_content.append(element_content)
+            element_content = extractor(child)
+            page_content.append({'type':_type, 'data':element_content})
     
     return page_content
 
-def identify_element_type(element:Tag) -> tuple[str, function]:
+def identify_element_type(element:Tag) -> tuple[str, Callable]:
     """
     identifies the elements type and returns the appropiate 
     extraction function
@@ -69,7 +36,7 @@ def identify_element_type(element:Tag) -> tuple[str, function]:
         return ('list', extract_list)
     elif element.name == 'p':
         return ('text', extract_text)
-    elif element.name in ('h1', 'h2', 'h3', 'h4', 'h5'):
+    elif element.name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
         return ('title', extract_text)
     elif element.name == 'img':
         return ('image', extract_image)
@@ -92,8 +59,16 @@ def extract_list(element:Tag)->List[str]:
         element_content.append(extract_text(child))
     return element_content
 
-def extract_image(element:Tag):
+def extract_image(element:Tag) -> dict:
     return {'description':element.attrs['alt'], 'src':element.attrs['src']}
+
+def table_tag_to_array(table:Tag) -> list:
+    table_data = []
+    rows = table.find_all('tr')
+    for row in rows:
+        table_data.append([td.text.strip().replace('\'', '') for td in row.children])
+    return table_data
+
 
 #pql examples
 def extract_pql_example(table:Tag) -> dict:
