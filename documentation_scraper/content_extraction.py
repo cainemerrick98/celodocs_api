@@ -1,20 +1,37 @@
 from typing import List, Union, Callable
 from bs4 import BeautifulSoup, Tag
-
+from collections import deque
 
 def extract_document_content(document:Tag) -> list[dict]:
     """
     extracts the document content using BFS from article root 
     which is the first section tag
     """
-    children = list(document.children)
+    children = deque(document.children)
     page_content = []
 
-    for child in children:
+    while children:
+        child = children.popleft()
+
+
+        #identify pql example and use correct function to identify it
+        if child.name == 'h6' and child.text == 'Examples':
+            child = children.popleft()
+            if child.name == 'p' and child.text == '':
+                child = children.popleft()
+            while (child.name == 'p' and child.text == '' ) or (child.attrs['class'] == ['informaltable', 'table-responsive']):
+                if child.name == 'p' and child.text == '':
+                    child = children.popleft()
+                else:
+                    page_content.append(extract_pql_example(list(child.children)[0]))
+                    child = children.popleft()
+                
+
         _type, extractor = identify_element_type(child)
         #recursive case
         if _type == 'container':
-            children += child.children
+            for c in list(child.children)[::-1]:
+                children.appendleft(c)
         #dont care case
         elif _type is None:
             continue

@@ -175,4 +175,27 @@ class TestContentExtraction(unittest.TestCase):
         document_content = extract_document_content(self.document.section)
         self.assertEqual(expected_value, document_content)
 
+class TestContentExtractionPUAvg(unittest.TestCase):
+
+    def setUp(self):
+        self.html_str = get_html_str(r'https://docs.celonis.com/en/pu_avg.html')
+        self.soup = create_beautiful_soup(self.html_str)
+        self.section = self.soup.find('section')
+        return super().setUp()
+    
+    def test_pu_avg_content_extraction(self):
+        page_content = extract_document_content(self.section)
+        print(page_content)
+
+class TestContentExtractionPUHomePage(unittest.TestCase):
+
+    def setUp(self):
+        self.html_str = get_html_str(r'https://docs.celonis.com/en/pql---process-query-language.html')
+        self.soup = create_beautiful_soup(self.html_str)
+        self.section = self.soup.find('section')
+        return super().setUp()
+    
+    def test_pu_avg_content_extraction(self):
+        page_content = extract_document_content(self.section)
+        
         
