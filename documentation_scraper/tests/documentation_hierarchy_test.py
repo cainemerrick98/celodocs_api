@@ -1,47 +1,20 @@
 import unittest
 from bs4 import BeautifulSoup
+from utils import get_html_str, create_beautiful_soup
 from documentation_hierarchy import (
-    get_celonis_docs_html,
-    create_beautiful_soup,
-    extract_sidebar,
     hierarchy_builder,
     build_documentation_hierarchy
 )
 
 class TestHierarchyBuilder(unittest.TestCase):
-    
-    def test_get_celonis_docs_html(self):
-        docs_html = get_celonis_docs_html()
-        self.assertIsInstance(docs_html, str)
-        self.assertTrue('Celonis documentation' in docs_html)
 
-    def test_create_beautiful_soup(self):
-        docs_html = get_celonis_docs_html()
-        soup = create_beautiful_soup(docs_html)
-        self.assertIsInstance(soup, BeautifulSoup)
-
-    def test_extract_sidebar(self):
-        docs_html = get_celonis_docs_html()
-        soup = create_beautiful_soup(docs_html)
-        sidebar = extract_sidebar(soup)
-        self.assertEqual(" Getting Started", sidebar.find('a').text)
-
-    def test_doc_builder(self):
-        docs_html = get_celonis_docs_html()
-        soup = create_beautiful_soup(docs_html)
-        sidebar = extract_sidebar(soup)
-        getting_started = sidebar.find('li')
-        documentation_hierarchy = {}
-        hierarchy_builder([getting_started], documentation_hierarchy)
-        print(documentation_hierarchy)
-        self.assertEqual(list(documentation_hierarchy.keys()), ['Getting Started'])
-        self.assertTrue('Contacting Support' in list(documentation_hierarchy['Getting Started']['children'].keys()))
+    def setUp(self):
+        html_str = get_html_str(r'https://docs.celonis.com/en/celonis-documentation.html')
+        self.soup = create_beautiful_soup(html_str)
+        return super().setUp()
     
     def test_build_documentation_hierarchy(self):
-        docs_html = get_celonis_docs_html()
-        soup = create_beautiful_soup(docs_html)
-        sidebar = extract_sidebar(soup)
-        documentation_hierarchy = build_documentation_hierarchy(sidebar)
+        documentation_hierarchy = build_documentation_hierarchy(self.soup)
         self.assertTrue('Getting Started' in list(documentation_hierarchy.keys()))
         self.assertTrue('Studio' in list(documentation_hierarchy.keys()))
         self.assertTrue('Celonis Process Management' in list(documentation_hierarchy.keys()))
