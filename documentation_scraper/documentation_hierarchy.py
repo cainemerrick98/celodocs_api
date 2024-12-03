@@ -1,12 +1,14 @@
 from bs4 import BeautifulSoup, Tag, ResultSet
 import requests
 import json
+from utils import get_html_str, create_beautiful_soup
 
-
-def build_documentation_hierarchy(soup:BeautifulSoup) -> dict:
+def build_documentation_hierarchy() -> dict:
     """
     builds a nested dictionary representing the documentation hierachy
     """
+    html_str = get_html_str(r'https://docs.celonis.com/en/celonis-documentation.html')
+    soup = create_beautiful_soup(html_str)
     sidebar = soup.find(name='ul', attrs={'class':'toc nav nav-site-sidebar'})
     if not sidebar:
         return {}
