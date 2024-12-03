@@ -17,7 +17,6 @@ def scrape_docs() -> dict:
         soup = create_beautiful_soup(document_html)
         section = soup.find('section')
         page_content = extract_document_content(section)
-
         document_hierarchy[key]['content'] = page_content
     
     return document_hierarchy

@@ -15,6 +15,7 @@ def extract_document_content(document:Tag) -> list[dict]:
 
 
         #identify pql example and use correct function to identify it
+        #TODO: extract below as identify case and create extraction func.
         if child.name == 'h6' and child.text == 'Examples':
             child = children.popleft()
             if child.name == 'p' and child.text == '':

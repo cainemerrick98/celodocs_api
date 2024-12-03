@@ -35,7 +35,7 @@ class TestHierarchyBuilder(unittest.TestCase):
         hierarchy_builder([getting_started], documentation_hierarchy)
         print(documentation_hierarchy)
         self.assertEqual(list(documentation_hierarchy.keys()), ['Getting Started'])
-        self.assertTrue('Contacting Support' in list(documentation_hierarchy['Getting Started'].keys()))
+        self.assertTrue('Contacting Support' in list(documentation_hierarchy['Getting Started']['children'].keys()))
     
     def test_build_documentation_hierarchy(self):
         docs_html = get_celonis_docs_html()

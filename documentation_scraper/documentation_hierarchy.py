@@ -28,30 +28,8 @@ def extract_sidebar(soup:BeautifulSoup) -> Tag:
 def build_documentation_hierarchy(sidebar:Tag) -> dict:
     """
     builds a dictionary that represents the documetation
-    hierarchy. The keys are the parents and the values are 
-    the children. 
-
-    example:
-    
-        {
-            'PQL - Process Query Language':{
-                
-                'PQL Function Library':{
-
-                    'Aggregation':{
-
-                        'Pull Up Aggregation':{
-                            'PU_AVG':None,
-                            'PU_COUNT_DISTINCT':None,
-                            ...
-                        ]
-                    },
-                    ...
-                },
-                ...
-            },
-            ...
-        }
+    hierarchy. Each key has a value for the link, the structured 
+    content and its children.
     """
     documentation_hierarchy = {}
     sections: ResultSet[Tag] = sidebar.find_all(name='li', recursive=False)
