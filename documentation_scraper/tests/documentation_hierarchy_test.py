@@ -2,7 +2,6 @@ import unittest
 from bs4 import BeautifulSoup
 from utils import get_html_str, create_beautiful_soup
 from documentation_hierarchy import (
-    hierarchy_builder,
     build_documentation_hierarchy
 )
 
