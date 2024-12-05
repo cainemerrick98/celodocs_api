@@ -16,7 +16,7 @@ from content_extraction import (
     extract_text,
     extract_list,
     extract_image,
-    table_tag_to_array,
+    extract_table,
 
     extract_document_content
 
@@ -72,7 +72,7 @@ class TestIdentifyElementAndExtractionFunctions(unittest.TestCase):
     def test_table_extraction(self):
         _type, extractor = identify_element_type(self.table.table)
         self.assertEqual(_type, 'table')
-        self.assertIs(extractor, table_tag_to_array)
+        self.assertIs(extractor, extract_table)
         self.assertEqual(extractor(self.table.table), [
             ['Name', 'Age'],
             ['Caine', '26'],
@@ -119,6 +119,7 @@ class TestPQLExampleExtraction(unittest.TestCase):
         self.assertListEqual(query_columns, ['"companyDetail"."companyCode"', 'PU_AVG ( "companyDetail" , "caseTable"."value" )'])
 
         input_tables = extract_pql_input_tables(rows[2])
+
         self.assertIsInstance(input_tables, dict)
         self.assertListEqual(list(input_tables.keys()), ['caseTable', 'companyDetail'])
         self.assertEqual(len(input_tables['caseTable']), 7)
@@ -179,6 +180,18 @@ class TestContentExtractionPUAvg(unittest.TestCase):
 
     def setUp(self):
         self.html_str = get_html_str(r'https://docs.celonis.com/en/pu_avg.html')
+        self.soup = create_beautiful_soup(self.html_str)
+        self.section = self.soup.find('section')
+        return super().setUp()
+    
+    def test_pu_avg_content_extraction(self):
+        page_content = extract_document_content(self.section)
+
+
+class TestContentExtractionIndexOrder(unittest.TestCase):
+
+    def setUp(self):
+        self.html_str = get_html_str(r'https://docs.celonis.com/en/index_order.html')
         self.soup = create_beautiful_soup(self.html_str)
         self.section = self.soup.find('section')
         return super().setUp()
